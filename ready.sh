@@ -9,7 +9,7 @@ cd data
 md5sum $(find . -type f) | tee ../check.md5
 cd ..
 
-HOST=192.168.3.9
-USER=pi
-DIR=demo/
+HOST=192.168.3.8
+USER=group5
+DIR=robust/
 scp check.md5 ${USER}@${HOST}:${DIR}
