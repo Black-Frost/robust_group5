@@ -11,5 +11,5 @@ cd ..
 
 HOST=192.168.3.8
 USER=group5
-DIR=robust/
+DIR=~/robust/
 scp check.md5 ${USER}@${HOST}:${DIR}
