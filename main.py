@@ -12,7 +12,7 @@ RECEIVER = HANAKO
 def main():
     if sys.argv[1] == "sender":
         scu = SCU(mtu=1500)
-        scu.bind_as_sender(receiver_address=(SENDER, 8889))
+        scu.bind_as_sender(receiver_address=(RECEIVER, 8889))
         try:
             # serial
             for id in range(0, 1000):
