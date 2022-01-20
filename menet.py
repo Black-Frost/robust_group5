@@ -53,7 +53,7 @@ elif side == "send":
     elif event.type == enet.EVENT_TYPE_RECEIVE:
         print("%s: IN:  %r" % (event.peer.address, event.packet.data))
         continue
-    msg = bytes("test", "utf-8")
+    msg = bytes("test"+str(counter), "utf-8")
     packet = enet.Packet(msg)
     peer.send(0, packet)
 
