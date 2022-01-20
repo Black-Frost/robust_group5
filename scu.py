@@ -107,8 +107,9 @@ class SCU:
                                 lost_packets_send = lost
                                 #seqPos = 0
                             if (last_seq > max_last_seq):
+                                lost_packets_send += [i for i in lost if i > max_last_seq]
                                 max_last_seq = last_seq
-                                lost_packets_send = lost
+                                #lost_packets_send = lost
 
                     except Exception as e: # When the queue is empty
                         if e == KeyboardInterrupt:
@@ -216,8 +217,8 @@ class SCU:
 
     def encode_rtr_list(self, key, last_seq):
         data = b""
-        for i in range(len(self.lost_packets_recv[key])):
-            data += self.lost_packets_recv[key].pop(-1).to_bytes(1, "big")
+        self.lost_packets_recv[key].clear()
+        data += bytes(self.lost_packets_recv[key])
         data += last_seq.to_bytes(1, "big")
         return data
 
