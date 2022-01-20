@@ -94,6 +94,7 @@ class SCU:
         retransmit_seq = 0 # Manage packets that need to be retransmitted (how far you can receive)
         seqPos = 0
         max_last_seq = 0
+        self.lost_packets_send[id] = [i for i in range(len(all_packets))]
         while True:
             try:
                 while True:
