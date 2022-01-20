@@ -12,7 +12,7 @@ addr = bytes(os.environ["TARO"],"utf-8")
 
 
 if side == "recv":
-  host = enet.Host(enet.Address(addr,8899),8,8)
+  host = enet.Host(enet.Address(addr,8899),10,2,0,0)
   
   while True: 
     event = host.service(1000)
