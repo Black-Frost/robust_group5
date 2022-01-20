@@ -103,13 +103,13 @@ class SCU:
                             return
                         elif sq < len(all_packets): # Retransmission request
                             retransmit_seq = max(sq, retransmit_seq)
-                            if (retransmit_seq == sq):
-                                lost_packets_send = lost
+                            #if (retransmit_seq == sq):
+                            lost_packets_send = [i for i in lost if i < len(all_packets)]
                                 #seqPos = 0
-                            if (last_seq > max_last_seq):
+                            '''if (last_seq > max_last_seq):
                                 lost_packets_send = sorted(lost + lost_packets_send)
                                 max_last_seq = last_seq
-                                #lost_packets_send = lost
+                                #lost_packets_send = lost'''
 
                     except Exception as e: # When the queue is empty
                         if e == KeyboardInterrupt:
@@ -118,8 +118,8 @@ class SCU:
                             break
                 with self.lock: # Lock required as multiple send methods may be running concurrently in parallel
                     self.socket.sendto(all_packets[lost_packets_send[seqPos % len(lost_packets_send)]].raw(), self.receiver_address) # Packet transmission
-                    if (max_last_seq != len(all_packets)):
-                        self.socket.sendto(all_packets[-1].raw(), self.receiver_address)
+                    #if (max_last_seq != len(all_packets)):
+                    #    self.socket.sendto(all_packets[-1].raw(), self.receiver_address)
 
                 #seq = max(seq + 1, retransmit_seq) # seq update
                 seqPos += 1
@@ -148,7 +148,7 @@ class SCU:
                 if key not in self.received_files_data:
                     self.received_files_data[key] = [b""]*100
                     received_files_flag[key] = False
-                    self.lost_packets_recv[key] = [] * 100
+                    self.lost_packets_recv[key] = [i for i in range(70)] #70 is the number of packets in a file with MTU = 1500
 
                 if received_files_flag[key]:
                     self.response(SCUPacketType.Fin.value, from_addr, packet.header.id, 0)
@@ -157,6 +157,7 @@ class SCU:
                 if packet.header.typ == SCUPacketType.DataEnd.value or packet.header.typ == SCUPacketType.Data.value:
                     if packet.header.typ == SCUPacketType.DataEnd.value:
                         received_files_length[key] = packet.header.seq + 1
+                        self.lost_packets_recv[key] = [i for i in self.lost_packets_recv[key] if i < received_files_length[key]]
 
                     self.received_files_data[key][packet.header.seq] = packet.payload
                     rtr = self.calculate_rtr(key, packet.header.seq)
@@ -175,14 +176,20 @@ class SCU:
                     traceback.print_exc()
 
     def calculate_rtr(self, key, seq):
-        for sq in range(0, seq):
+        '''for sq in range(0, seq):
             if not self.received_files_data[key][sq]:
-                self.lost_packets_recv[key].append(sq)
+                self.lost_packets_recv[key].append(sq)'''
+
+        for sq in range(len(self.received_files_data[key])):
+            if self.received_files_data[key][sq]:
+                self.received_files_data[key].remove(sq)
 
         if (len(self.lost_packets_recv[key]) == 0):
             return None
         else:
             return self.lost_packets_recv[key][0]
+
+
 
     def is_all_received(self, key, length):
         for i in range(0, length):
@@ -219,8 +226,6 @@ class SCU:
         data = b""
         data += bytes(self.lost_packets_recv[key])
         data += last_seq.to_bytes(1, "big")
-        self.lost_packets_recv[key].clear()
-
         return data
 
     def parse_rtr_list(self, payload):
