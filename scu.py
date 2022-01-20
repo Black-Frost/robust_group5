@@ -220,6 +220,7 @@ class SCU:
         data += bytes(self.lost_packets_recv[key])
         data += last_seq.to_bytes(1, "big")
         self.lost_packets_recv[key].clear()
+
         return data
 
     def parse_rtr_list(self, payload):
