@@ -7,12 +7,12 @@ import enet
 
 load_dotenv()
 side = os.environ["side"]
-addr = bytes(os.environ["TARO"],"utf-8")
+addr = bytes(os.environ["HANAKO"],"utf-8")
 
 
 
 if side == "recv":
-  host = enet.Host(enet.Address(addr,8899),10,0,0,0)
+  host = enet.Host(enet.Address(addr,8899),10,8,0,0)
   
   while True: 
     event = host.service(1000)
