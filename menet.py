@@ -13,21 +13,28 @@ addr = bytes(os.environ["HANAKO"],"utf-8")
 
 if side == "recv":
   host = enet.Host(enet.Address(addr,8899),10,8,0,0)
-  
+  connect_count = 0
+  run = True
+  shutdown_recv = False
   while True: 
-    event = host.service(1000)
-    if event.type == "ENET_EVENT_TYPE_CONNECT ":
-      print("new client", event.peer)
-    
-    elif event.type == "ENET_EVENT_TYPE_RECEIVE":
-      print("data recv")
-      print(event.packet)
-      print(event.peer)
-      print(event.channelID)
-
-
-    elif event.type == "ENET_EVENT_TYPE_DISCONNECT":
-      print("client discon", event.peer)
+    event = host.service(10)
+    if event.type == enet.EVENT_TYPE_CONNECT:
+        print("%s: CONNECT" % event.peer.address)
+        connect_count += 1
+    elif event.type == enet.EVENT_TYPE_DISCONNECT:
+        print("%s: DISCONNECT" % event.peer.address)
+        connect_count -= 1
+        if connect_count <= 0 and shutdown_recv:
+            run = False
+    elif event.type == enet.EVENT_TYPE_RECEIVE:
+        print("%s: IN:  %r" % (event.peer.address, event.packet.data))
+        msg = event.packet.data
+        if event.peer.send(0, enet.Packet(msg)) < 0:
+            print("%s: Error sending echo packet!" % event.peer.address)
+        else:
+            print("%s: OUT: %r" % (event.peer.address, msg))
+        if event.packet.data == b"SHUTDOWN":
+            shutdown_recv = True
 
 elif side == "send":
   counter = 0
