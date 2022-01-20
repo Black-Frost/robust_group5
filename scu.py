@@ -180,7 +180,7 @@ class SCU:
             if not self.received_files_data[key][sq]:
                 self.lost_packets_recv[key].append(sq)'''
 
-        for sq in range(len(self.received_files_data[key])):
+        for sq in self.lost_packets_recv[key]:
             if self.received_files_data[key][sq]:
                 self.lost_packets_recv[key].remove(sq)
 
