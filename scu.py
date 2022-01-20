@@ -17,7 +17,6 @@ class SCU:
     def bind_as_sender(self, receiver_address):
         self.mode = SCUMode.SendMode
         self.connection_manager = {}
-        self.lost_packets_send = {}
 
         self.socket =  socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.receiver_address = receiver_address
@@ -73,7 +72,6 @@ class SCU:
             raise Exception
         queue = Queue()
         self.connection_manager[id] = queue # Register a connection
-        self.lost_packets_send[id] = []     # Lost packets manager
 
         data_fragments = utils.split_file_into_mtu(filepath, self.mtu)
 
@@ -94,7 +92,7 @@ class SCU:
         retransmit_seq = 0 # Manage packets that need to be retransmitted (how far you can receive)
         seqPos = 0
         max_last_seq = 0
-        self.lost_packets_send[id] = [i for i in range(len(all_packets))]
+        lost_packets_send = [i for i in range(len(all_packets))]
         while True:
             try:
                 while True:
@@ -102,16 +100,15 @@ class SCU:
                         fin, sq, lost, last_seq = queue.get(block=False) # Resend request or reception completion report
                         if fin: # send completely
                             del(self.connection_manager[id]) # Disconnect
-                            del(self.lost_packets_send[id])
                             return
                         elif sq < len(all_packets): # Retransmission request
                             retransmit_seq = max(sq, retransmit_seq)
                             if (retransmit_seq == sq):
-                                self.lost_packets_send[id] = lost
+                                lost_packets_send = lost.copy()
                                 #seqPos = 0
                             if (last_seq > max_last_seq):
                                 max_last_seq = last_seq
-                                self.lost_packets_send[id] = lost
+                                lost_packets_send = lost.copy()
 
                     except Exception as e: # When the queue is empty
                         if e == KeyboardInterrupt:
@@ -119,7 +116,7 @@ class SCU:
                         else:
                             break
                 with self.lock: # Lock required as multiple send methods may be running concurrently in parallel
-                    self.socket.sendto(all_packets[self.lost_packets_send[id][seqPos % len(self.lost_packets_send[id])]].raw(), self.receiver_address) # Packet transmission
+                    self.socket.sendto(all_packets[lost_packets_send[seqPos % len(lost_packets_send)]].raw(), self.receiver_address) # Packet transmission
                     if (max_last_seq != len(all_packets)):
                         self.socket.sendto(all_packets[-1].raw(), self.receiver_address)
 
