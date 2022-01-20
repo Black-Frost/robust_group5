@@ -174,6 +174,7 @@ class SCU:
                     traceback.print_exc()
 
     def calculate_rtr(self, key, seq):
+        self.lost_packets_recv[key].clear()
         for sq in range(0, seq):
             if not self.received_files_data[key][sq]:
                 self.lost_packets_recv[key].append(sq)
