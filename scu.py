@@ -105,6 +105,7 @@ class SCU:
                             break
                 with self.lock: # Lock required as multiple send methods may be running concurrently in parallel
                     self.socket.sendto(all_packets[seq].raw(), self.receiver_address) # Packet transmission
+                    self.socket.sendto(all_packets[seq].raw(), self.receiver_address)
 
                 seq = max(seq + 1, retransmit_seq) # seq update
                 if seq >= len(all_packets):

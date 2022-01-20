@@ -1,5 +1,6 @@
 import sys
 # import threading
+import time
 import utils
 from scu import SCU
 
@@ -7,9 +8,10 @@ HANAKO = "169.254.229.153"
 TARO = "169.254.155.219"
 
 def main():
+    start = time.time()
     if sys.argv[1] == "sender":
         scu = SCU(mtu=1500)
-        scu.bind_as_sender(receiver_address=(HANAKO, 8889))
+        scu.bind_as_sender(receiver_address=(HANAKO, 1234))
         try:
             # serial
             for id in range(0, 1000):
@@ -32,11 +34,14 @@ def main():
     elif sys.argv[1] == "receiver":
         # TODO
         scu = SCU(mtu = 1500)
-        scu.bind_as_receiver(receiver_address = (TARO, 8889))
+        scu.bind_as_receiver(receiver_address = (TARO, 1234))
         for i in range(0, 1000):
             filedata = scu.recv()
             utils.write_file(f"./data/data{i}", filedata)
             print(f"file received: {i}", end="\r")
+
+    end = time.time()
+    print(f"{end - start:.5f} sec")
 
 if __name__ == '__main__':
     main()
