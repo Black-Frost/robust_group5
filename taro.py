@@ -8,7 +8,7 @@ TARO = "169.254.155.219"
 
 def main():
   scu = SCU(mtu=1500)
-  scu.bind_as_sender(receiver_address=(HANAKO, 8899))
+  scu.bind_as_sender(receiver_address=(HANAKO, 8889))
   try:
       # serial
       for id in range(0, 1000):
