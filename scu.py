@@ -104,11 +104,11 @@ class SCU:
                         elif sq < len(all_packets): # Retransmission request
                             retransmit_seq = max(sq, retransmit_seq)
                             if (retransmit_seq == sq):
-                                lost_packets_send = lost.copy()
+                                lost_packets_send = lost
                                 #seqPos = 0
                             if (last_seq > max_last_seq):
                                 max_last_seq = last_seq
-                                lost_packets_send = lost.copy()
+                                lost_packets_send = lost
 
                     except Exception as e: # When the queue is empty
                         if e == KeyboardInterrupt:
@@ -174,7 +174,6 @@ class SCU:
                     traceback.print_exc()
 
     def calculate_rtr(self, key, seq):
-        self.lost_packets_recv[key].clear()
         for sq in range(0, seq):
             if not self.received_files_data[key][sq]:
                 self.lost_packets_recv[key].append(sq)
@@ -217,14 +216,14 @@ class SCU:
 
     def encode_rtr_list(self, key, last_seq):
         data = b""
-        for i in self.lost_packets_recv[key]:
-            data += i.to_bytes(1, "big")
+        for i in range(len(self.lost_packets_recv[key])):
+            data += self.lost_packets_recv[key].pop(-1).to_bytes(1, "big")
         data += last_seq.to_bytes(1, "big")
         return data
 
     def parse_rtr_list(self, payload):
         lost_packets = []
         for i in range(len(payload) - 1):
-            lost_packets.append(int.from_bytes(payload[i:i+1], "big"))
+            lost_packets.append(payload[i])
         last_seq = payload[-1]
         return lost_packets, last_seq
