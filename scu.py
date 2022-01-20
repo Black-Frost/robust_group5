@@ -17,6 +17,7 @@ class SCU:
     def bind_as_sender(self, receiver_address):
         self.mode = SCUMode.SendMode
         self.connection_manager = {}
+        self.lost_packets_send = {}
 
         self.socket =  socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.receiver_address = receiver_address
@@ -29,6 +30,7 @@ class SCU:
     def bind_as_receiver(self, receiver_address):
         self.mode = SCUMode.RecvMode
         self.received_files_data = {}
+        self.lost_packets_recv = {}      #save the seq data of un-received packets
 
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.bind(receiver_address)
@@ -42,6 +44,7 @@ class SCU:
     def drop(self):
         if self.mode == SCUMode.SendMode:
             self.connection_manager.clear()
+            self.lost_packets_send.clear()
             self.socket.close()
 
     def _sender_packet_loop(self):
@@ -54,9 +57,10 @@ class SCU:
                 if packet.header.id not in self.connection_manager:
                     continue
                 if packet.header.typ == SCUPacketType.Fin.value:
-                    self.connection_manager[packet.header.id].put((True, packet.header.seq))
+                    self.connection_manager[packet.header.id].put((True, packet.header.seq, None, None))
                 elif packet.header.typ == SCUPacketType.Rtr.value:
-                    self.connection_manager[packet.header.id].put((False, packet.header.seq))
+                    lost, last_seq = self.parse_rtr_list(packet.payload)
+                    self.connection_manager[packet.header.id].put((False, packet.header.seq, lost, last_seq))
             except Exception as e: # When recv fails and when put fails (appropriate)
                 if e == KeyboardInterrupt:
                     raise KeyboardInterrupt
@@ -69,6 +73,7 @@ class SCU:
             raise Exception
         queue = Queue()
         self.connection_manager[id] = queue # Register a connection
+        self.lost_packets_send[id] = []     # Lost packets manager
 
         data_fragments = utils.split_file_into_mtu(filepath, self.mtu)
 
@@ -87,28 +92,39 @@ class SCU:
             all_packets.append(packet)
 
         retransmit_seq = 0 # Manage packets that need to be retransmitted (how far you can receive)
-        seq = 0
+        seqPos = 0
+        max_last_seq = 0
         while True:
             try:
                 while True:
                     try:
-                        fin, sq = queue.get(block=False) # Resend request or reception completion report
+                        fin, sq, lost, last_seq = queue.get(block=False) # Resend request or reception completion report
                         if fin: # send completely
                             del(self.connection_manager[id]) # Disconnect
+                            del(self.lost_packets_send[id])
                             return
                         elif sq < len(all_packets): # Retransmission request
                             retransmit_seq = max(sq, retransmit_seq)
+                            if (retransmit_seq == sq):
+                                self.lost_packets_send[id] = lost
+                                #seqPos = 0
+                            if (last_seq > max_last_seq):
+                                max_last_seq = last_seq
+                                self.lost_packets_send[id] = lost
+
                     except Exception as e: # When the queue is empty
                         if e == KeyboardInterrupt:
                             raise KeyboardInterrupt
                         else:
                             break
                 with self.lock: # Lock required as multiple send methods may be running concurrently in parallel
-                    self.socket.sendto(all_packets[seq].raw(), self.receiver_address) # Packet transmission
+                    self.socket.sendto(all_packets[self.lost_packets_send[id][seqPos % len(self.lost_packets_send[id])]].raw(), self.receiver_address) # Packet transmission
+                    if (max_last_seq != len(all_packets)):
+                        self.socket.sendto(all_packets[-1].raw(), self.receiver_address)
 
-                seq = max(seq + 1, retransmit_seq) # seq update
-                if seq >= len(all_packets):
-                    seq = retransmit_seq
+                #seq = max(seq + 1, retransmit_seq) # seq update
+                seqPos += 1
+
             except Exception as e: # When sendto fails (appropriate)
                 if e == KeyboardInterrupt:
                     raise KeyboardInterrupt
@@ -133,6 +149,7 @@ class SCU:
                 if key not in self.received_files_data:
                     self.received_files_data[key] = [b""]*100
                     received_files_flag[key] = False
+                    self.lost_packets_recv[key] = [] * 100
 
                 if received_files_flag[key]:
                     self.response(SCUPacketType.Fin.value, from_addr, packet.header.id, 0)
@@ -145,7 +162,7 @@ class SCU:
                     self.received_files_data[key][packet.header.seq] = packet.payload
                     rtr = self.calculate_rtr(key, packet.header.seq)
                     if rtr is not None: # Need to request resend
-                        self.response(SCUPacketType.Rtr.value, from_addr, packet.header.id, rtr)
+                        self.response(SCUPacketType.Rtr.value, from_addr, packet.header.id, rtr, key, packet.header.seq)
                     elif key in received_files_length and self.is_all_received(key, received_files_length[key]): #  File reception completed
                         received_files_flag[key] = True
                         self.response(SCUPacketType.Fin.value, from_addr, packet.header.id, 0)
@@ -161,8 +178,12 @@ class SCU:
     def calculate_rtr(self, key, seq):
         for sq in range(0, seq):
             if not self.received_files_data[key][sq]:
-                return sq
-        return None
+                self.lost_packets_recv[key].append(sq)
+
+        if (len(self.lost_packets_recv[key]) == 0):
+            return None
+        else:
+            return self.lost_packets_recv[key][0]
 
     def is_all_received(self, key, length):
         for i in range(0, length):
@@ -170,14 +191,15 @@ class SCU:
                 return False
         return True
 
-    def response(self, typ, addr, id, rtr):
+    def response(self, typ, addr, id, rtr, key = None, lastSeq = None):
         if self.mode == SCUMode.SendMode:
             raise Exception
         if typ == SCUPacketType.Rtr.value:
             header = SCUHeader()
             header.from_dict({ "typ": typ, "id": id, "seq": rtr, })
             packet = SCUPacket()
-            packet.from_dict({ "header": header, "payload": b'', })
+            payload = self.encode_rtr_list(key, lastSeq)
+            packet.from_dict({ "header": header, "payload": payload, })
             self.socket.sendto(packet.raw(), addr)
 
         elif typ == SCUPacketType.Fin.value:
@@ -193,3 +215,17 @@ class SCU:
         key, length = self.file_received.get()
         return utils.fold_data(self.received_files_data[key], length)
 
+
+    def encode_rtr_list(self, key, last_seq):
+        data = b""
+        for i in self.lost_packets_recv[key]:
+            data += i.to_bytes(1, "big")
+        data += last_seq.to_bytes(1, "big")
+        return data
+
+    def parse_rtr_list(self, payload):
+        lost_packets = []
+        for i in range(len(payload) - 1):
+            lost_packets.append(int.from_bytes(payload[i], "big"))
+        last_seq = int.from_bytes(payload[-1], "big")
+        return lost_packets, last_seq
