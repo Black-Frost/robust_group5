@@ -227,6 +227,6 @@ class SCU:
     def parse_rtr_list(self, payload):
         lost_packets = []
         for i in range(len(payload) - 1):
-            lost_packets.append(int.from_bytes(payload[i], "big"))
-        last_seq = int.from_bytes(payload[-1], "big")
+            lost_packets.append(int.from_bytes(payload[i:i+1], "big"))
+        last_seq = payload[-1]
         return lost_packets, last_seq
