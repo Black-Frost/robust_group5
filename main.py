@@ -16,7 +16,7 @@ TARO = "169.254.155.219"
 
 if side == "send":
         scu = SCU(mtu=1500)
-        scu.bind_as_sender(receiver_address=(TARO, 8889))
+        scu.bind_as_sender(receiver_address=(TARO, 8899))
         try:
             # serial
             for id in range(0, 1000):
@@ -39,7 +39,7 @@ if side == "send":
 elif side == "recv":
     # TODO
     scu = SCU(mtu = 1500)
-    scu.bind_as_receiver(receiver_address = (HANAKO, 8889))
+    scu.bind_as_receiver(receiver_address = (HANAKO, 8899))
     for i in range(0, 1000):
         filedata = scu.recv()
         utils.write_file(f"./data/data{i}", filedata)
