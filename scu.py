@@ -2,6 +2,7 @@ from queue import Queue
 import socket
 import threading
 from enum import Enum
+import time
 
 from packet import SCUPacketType, SCUHeader, SCUPacket
 import utils
@@ -170,6 +171,12 @@ class SCU:
                         received_files_flag[key] = True
                         self.response(SCUPacketType.Fin.value, from_addr, packet.header.id, 0)
                         self.file_received.put((key, received_files_length[key]))
+
+                elif rtr is not None:
+                    time.sleep(0.3)
+                    self.response(SCUPacketType.Rtr.value, from_addr, packet.header.id, rtr, key, packet.header.seq)
+
+
 
             except Exception as e: # When recv fails and when put fails (appropriate)
                 if e == KeyboardInterrupt:
