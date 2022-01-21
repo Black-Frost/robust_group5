@@ -114,7 +114,7 @@ def get_data():
     if current_file < file:
       current_file = file
     lock.release()
-    filePath = 'data2/data' + str(file)
+    filePath = 'data/data' + str(file)
     buff[file].append([part, data[indexingSize:]])
     if len(buff[file]) == partsPerFile:
       b = buff[file]
