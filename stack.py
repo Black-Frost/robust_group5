@@ -7,7 +7,8 @@ from collections import defaultdict
 # if len(sys.argv) < 2:
 #   print('Usage: <side> <user>. Example: python3 testing_02.py sender Taro')
 #   exit()
-print(os.environ)
+load_dotenv()
+# print(os.environ)
 # [side, user] = sys.argv[1:]
 side = os.environ["side"]
 user = os.environ["host"]
