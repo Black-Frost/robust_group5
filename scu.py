@@ -108,7 +108,7 @@ class SCU:
                                 lost_packets_send = lost
                                 #seqPos = 0
                             if (last_seq > max_last_seq):
-                                lost_packets_send += [i for i in lost if i > max_last_seq]
+                                lost_packets_send = sorted(lost + lost_packets_send)
                                 max_last_seq = last_seq
                                 #lost_packets_send = lost
 
@@ -127,7 +127,7 @@ class SCU:
                         self.socket.sendto(all_packets[seq].raw(), self.receiver_address)
 
                 #seq = max(seq + 1, retransmit_seq) # seq update
-                seqPos += 1
+                #seqPos += 1
 
             except Exception as e: # When sendto fails (appropriate)
                 if e == KeyboardInterrupt:
