@@ -41,6 +41,7 @@ received_files_db = {}
 
 
 def import_file(start=0, db_size=100):
+  print("Importing data")
   raw_datalist = [[] for q in range(file_quantity)]
   for i in range(start, db_size):
     file = open(DATA_PATH+str(i), "rb").read()
@@ -59,6 +60,7 @@ def import_file(start=0, db_size=100):
 
       current_byte = last_byte
       last_byte += part_size
+  print("Import Done")
   return raw_datalist      
 
 
@@ -69,6 +71,8 @@ def send_data(db, port_offset=0):
     for packet in packets:
       sub_socket.sendto(packet, (receiver_ip, receiver_port + port_offset))
     current_file += 1
+  if current_file % 5 ==0:
+    print("send:",current_file)
 
 # def add_check_corrupted(sub_socket):
 #   recv_data = sub_socket.recv(2000)
@@ -104,6 +108,7 @@ def recv_data(port_offset=0):
       count += 1
       print("Writing file_id:", file_id)
       del received_files_db[file_id]
+      print("writing :",file_id)
 
 side = os.environ["side"]
 user = os.environ["host"]
