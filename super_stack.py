@@ -94,7 +94,7 @@ def recv_data(port_offset=0):
 
     # thread_locker.acquire()
 
-    corrupted_file[file_id][file_part] = False
+    # corrupted_file[file_id][file_part] = False
 
     received_files_db.setdefault(file_id, [])
     received_files_db[file_id].append([file_part, data])
