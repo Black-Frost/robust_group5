@@ -107,10 +107,10 @@ class SCU:
                             if (retransmit_seq == sq):
                                 lost_packets_send = lost
                                 #seqPos = 0
-                            if (last_seq > max_last_seq):
+                            '''if (last_seq > max_last_seq):
                                 lost_packets_send = list(set(lost + lost_packets_send))
                                 max_last_seq = last_seq
-                                #lost_packets_send = lost
+                                #lost_packets_send = lost'''
 
                     except Exception as e: # When the queue is empty
                         if e == KeyboardInterrupt:
@@ -153,7 +153,7 @@ class SCU:
                 if key not in self.received_files_data:
                     self.received_files_data[key] = [b""]*100
                     received_files_flag[key] = False
-                    self.lost_packets_recv[key] = [] * 100
+                    self.lost_packets_recv[key] = [i for i in range(70)]
 
                 if received_files_flag[key]:
                     self.response(SCUPacketType.Fin.value, from_addr, packet.header.id, 0)
@@ -186,10 +186,17 @@ class SCU:
                     traceback.print_exc()
 
     def calculate_rtr(self, key, seq):
-        self.lost_packets_recv[key].clear()
+        '''self.lost_packets_recv[key].clear()
         for sq in range(0, seq):
             if not self.received_files_data[key][sq]:
-                self.lost_packets_recv[key].append(sq)
+                self.lost_packets_recv[key].append(sq)'''
+
+        '''for sq in self.lost_packets_recv[key]:
+            if not not self.received_files_data[key][sq]:
+                self.lost_packets_recv[key].remove(sq)'''
+
+        self.lost_packets_recv[key] = [i for i in self.lost_packets_recv[key] if not self.received_files_data[key][i]]
+
 
         if (len(self.lost_packets_recv[key]) == 0):
             return None
