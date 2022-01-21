@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import socket, sys, time, os, threading, copy, signal
 from collections import defaultdict
 
-from mlt_stack import DATA_PATH
+# from mlt_stack import DATA_PATH
 
 
 load_dotenv()
