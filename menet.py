@@ -42,26 +42,34 @@ elif side == "send":
   MSG_NUMBER = 100
   host = enet.Host(None, 1, 0, 0, 0)
   peer = host.connect(enet.Address(addr, 8899), 1)
-  while True:
-    event = host.service(1000)
-    if event.type == enet.EVENT_TYPE_CONNECT:
-        print("%s: CONNECT" % event.peer.address)
-    elif event.type == enet.EVENT_TYPE_DISCONNECT:
-        print("%s: DISCONNECT" % event.peer.address)
-        run = False
-        continue
-    elif event.type == enet.EVENT_TYPE_RECEIVE:
-        print("%s: IN:  %r" % (event.peer.address, event.packet.data))
-        continue
-    msg = bytes("test"+str(counter), "utf-8")
-    packet = enet.Packet(msg)
-    peer.send(0, packet)
+  run = True
+  datalist = [i for i in range(1000)]
+  ind = 0
+  while run:
+    print("=======================================current len dl", len(datalist))
+    for data in datalist:
+      event = host.service(1000)
+      if event.type == enet.EVENT_TYPE_CONNECT:
+          print("%s: CONNECT" % event.peer.address)
+      elif event.type == enet.EVENT_TYPE_DISCONNECT:
+          print("%s: DISCONNECT" % event.peer.address)
+          run = False
+          continue
+      elif event.type == enet.EVENT_TYPE_RECEIVE:
+          print("%s: IN:  %r" % (event.peer.address, event.packet.data))
+          if int(event.packet.data) in datalist:
+            datalist.remove(int(event.packet.data))
+          continue
+      raw_msg = data
+      msg = bytes(str(raw_msg), "utf-8")
+      packet = enet.Packet(msg)
+      peer.send(0, packet)
 
-    counter += 1
-    if counter >= MSG_NUMBER:
-        msg = SHUTDOWN_MSG
-        peer.send(0, enet.Packet(msg))
-        host.service(100)
-        peer.disconnect()
+      counter += 1
+      if counter >= MSG_NUMBER:
+          msg = SHUTDOWN_MSG
+          peer.send(0, enet.Packet(msg))
+          host.service(100)
+          peer.disconnect()
 
-    print("%s: OUT: %r" % (peer.address, msg))
+      print("%s: OUT: %r" % (peer.address, msg))

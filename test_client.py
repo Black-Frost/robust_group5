@@ -26,7 +26,8 @@ while run:
     elif event.type == enet.EVENT_TYPE_RECEIVE:
         print("%s: IN:  %r" % (event.peer.address, event.packet.data))
         continue
-    msg = bytes(bytearray([random.randint(0,255) for i in range(40)]))
+    # msg = bytes(bytearray([random.randint(0,255) for i in range(40)]))
+    
     packet = enet.Packet(msg)
     peer.send(0, packet)
 
@@ -63,18 +64,18 @@ def receive_callback(address, data):
 while run:
     event = host.service(1000)
     if event.type == enet.EVENT_TYPE_CONNECT:
-        print("%s: CONNECT" % event.peer.address)
+        print("%s: CONNECT2" % event.peer.address)
         msg = bytes(bytearray([random.randint(0,255) for i in range(40)]))
         packet = enet.Packet(msg)
         peer.send(0, packet)
 
         host.intercept = receive_callback
     elif event.type == enet.EVENT_TYPE_DISCONNECT:
-        print("%s: DISCONNECT" % event.peer.address)
+        print("%s: DISCONNECT2" % event.peer.address)
         run = False
         continue
     elif event.type == enet.EVENT_TYPE_RECEIVE:
-        print("%s: IN:  %r" % (event.peer.address, event.packet.data))
+        print("%s: IN2:  %r" % (event.peer.address, event.packet.data))
         continue
 
     if shutdown_scheduled:
