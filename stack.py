@@ -1,12 +1,13 @@
 #! /user/bin/env python3
+from dotenv import load_dotenv
+
 import socket, sys, time, os, threading, copy, signal
 from collections import defaultdict
-from dotenv import load_dotenv
 
 # if len(sys.argv) < 2:
 #   print('Usage: <side> <user>. Example: python3 testing_02.py sender Taro')
 #   exit()
-
+print(os.environ)
 # [side, user] = sys.argv[1:]
 side = os.environ["side"]
 user = os.environ["host"]
