@@ -108,7 +108,7 @@ class SCU:
                                 lost_packets_send = lost
                                 #seqPos = 0
                             if (last_seq > max_last_seq):
-                                lost_packets_send = sorted(lost + lost_packets_send)
+                                lost_packets_send += [i for i in lost if i > max_last_seq]
                                 max_last_seq = last_seq
                                 #lost_packets_send = lost
 
@@ -172,9 +172,9 @@ class SCU:
                         self.response(SCUPacketType.Fin.value, from_addr, packet.header.id, 0)
                         self.file_received.put((key, received_files_length[key]))
 
-                elif rtr is not None:
-                    time.sleep(0.3)
-                    self.response(SCUPacketType.Rtr.value, from_addr, packet.header.id, rtr, key, packet.header.seq)
+                #elif rtr is not None:
+                #    time.sleep(0.3)
+                #    self.response(SCUPacketType.Rtr.value, from_addr, packet.header.id, rtr, key, packet.header.seq)
 
 
 
