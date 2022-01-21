@@ -15,8 +15,8 @@ user = os.environ["host"]
 
 host = "" #receiver
 bind_host = "" #sender
-port = ""
-bind_port = ""
+port = 0
+bind_port = 0
 
 Taro = ("169.254.155.219",14547)
 Hanako = ("169.254.229.153", 14548)
@@ -114,7 +114,7 @@ def get_data():
     if current_file < file:
       current_file = file
     lock.release()
-    filePath = 'data/data' + str(file)
+    filePath = 'data2/data' + str(file)
     buff[file].append([part, data[indexingSize:]])
     if len(buff[file]) == partsPerFile:
       b = buff[file]
@@ -133,7 +133,7 @@ if side == 'sender':
     host, port = Hanako
     bind_host, bind_port = Taro
   elif user == "Hanako":
-    filenumber = 650
+    filenumber = 1000
     host, port = Taro
     bind_host, bind_port = Hanako
   raws = [[] for _ in range(filenumber)]
@@ -146,7 +146,7 @@ if side == 'sender':
   signal.setitimer(signal.ITIMER_REAL, INTERRUPT_TIME, INTERRUPT_TIME)
 else:
   if user == "Taro":
-    filenumber = 650
+    filenumber = 1000
     host, port = Taro
     bind_host, bind_port = Hanako
   elif user == "Hanako":
