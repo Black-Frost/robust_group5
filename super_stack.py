@@ -22,8 +22,8 @@ Hanako_PORT = 14547
 initial_file = 0
 file_part_size = 40
 threads_size = 10
-sender_port = 14577
-receiver_port = 14578
+sender_port = 14579
+receiver_port = 14575
 
 #============== Static Config ==============#
 DATA_PREFIX = "data"
@@ -72,8 +72,8 @@ def send_data(db, port_offset=0):
     for packet in packets:
       sub_socket.sendto(packet, (receiver_ip, receiver_port + port_offset))
     current_file += 1
-  if current_file % 5 ==0:
-    print("send:",current_file)
+    if current_file % 5 ==0:
+      print("send:",current_file)
 
 # def add_check_corrupted(sub_socket):
 #   recv_data = sub_socket.recv(2000)
@@ -109,7 +109,7 @@ def recv_data(port_offset=0):
       count += 1
       print("Writing file_id:", file_id)
       del received_files_db[file_id]
-      print("writing :",file_id)
+      # print("writing :",file_id)
 
 side = os.environ["side"]
 user = os.environ["host"]
