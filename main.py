@@ -11,8 +11,10 @@ load_dotenv()
 side = os.environ["side"]
 addr = bytes(os.environ["HANAKO"],"utf-8")
 
-HANAKO = "169.254.229.153"
-TARO = "169.254.155.219"
+# HANAKO = "169.254.229.153"
+# TARO = "169.254.155.219"
+HANAKO = os.environ["HANAKO"]
+TARO = os.environ["TARO"]
 
 if side == "send":
         scu = SCU(mtu=1500)
