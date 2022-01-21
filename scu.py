@@ -117,9 +117,13 @@ class SCU:
                         else:
                             break
                 with self.lock: # Lock required as multiple send methods may be running concurrently in parallel
-                    self.socket.sendto(all_packets[lost_packets_send[seqPos % len(lost_packets_send)]].raw(), self.receiver_address) # Packet transmission
-                    if (max_last_seq != len(all_packets)):
-                        self.socket.sendto(all_packets[-1].raw(), self.receiver_address)
+                    #self.socket.sendto(all_packets[lost_packets_send[seqPos % len(lost_packets_send)]].raw(), self.receiver_address) # Packet transmission
+                    #if (max_last_seq != len(all_packets)):
+                    #    self.socket.sendto(all_packets[-1].raw(), self.receiver_address)
+
+                    #Send all the lost packets at once
+                    for seq in lost_packets_send:
+                        self.socket.sendto(all_packets[seq].raw(), self.receiver_address)
 
                 #seq = max(seq + 1, retransmit_seq) # seq update
                 seqPos += 1
