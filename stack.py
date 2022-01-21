@@ -18,8 +18,8 @@ bind_host = "" #sender
 port = ""
 bind_port = ""
 
-Taro = ("169.254.155.219",'14547')
-Hanako = ("169.254.229.153", '14548')
+Taro = ("169.254.155.219",14547)
+Hanako = ("169.254.229.153", 14548)
 
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 s2 = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -60,7 +60,7 @@ def read_files():
 def work():
   for i in range(filenumber):
     for j in range(partsPerFile):
-      s.sendto(raws[i][j], (host, int(port)))
+      s.sendto(raws[i][j], (host, port))
     if i % 10 == 0:
       print(i)
 
@@ -71,7 +71,7 @@ def check_fail(args1, args2):
     tmp = int.from_bytes(recv_binary_data[j:j + indexingSize],'big')
     file = tmp//partsPerFile
     part = tmp% partsPerFile
-    s.sendto(raws[file][part], (host, int(port)))
+    s.sendto(raws[file][part], (host, port))
   #  print((file,part))
  # print("############\n")
 
@@ -94,7 +94,7 @@ def require_resend_thread():
         if r[i][j] == True:
          # print((i,j))
           raw += (i*partsPerFile + j).to_bytes(2,'big')
-    s2.sendto(raw,(bind_host, int(bind_port)))
+    s2.sendto(raw,(bind_host, bind_port))
   #  print("#########\n")
 
 def get_data():
@@ -140,7 +140,7 @@ if side == 'sender':
   read_files()
   t = threading.Thread(target=work, args=())
   t.start()
-  s2.bind((bind_host,int(bind_port)))
+  s2.bind((bind_host,bind_port))
   INTERRUPT_TIME = 0.3 #process resend every 0.1s
   signal.signal(signal.SIGALRM, check_fail)
   signal.setitimer(signal.ITIMER_REAL, INTERRUPT_TIME, INTERRUPT_TIME)
@@ -153,7 +153,7 @@ else:
     host, port = Hanako
     bind_host, bind_port = Taro
   require = [[True]*(partsPerFile+1) for _ in range(filenumber)]
-  s.bind((host, int(port)))
+  s.bind((host, port))
   buff = defaultdict(list)
   lock = threading.Lock()
   t1 = threading.Thread(target=require_resend_thread, args=())
