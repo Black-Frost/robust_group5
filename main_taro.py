@@ -10,11 +10,11 @@ TARO = "169.254.155.219"
 def main():
     start = time.time()
     if sys.argv[1] == "sender":
-        scu = SCU(mtu=1500)
+        scu = SCU(mtu=3000)
         scu.bind_as_sender(receiver_address=(HANAKO, 1234))
         try:
             # serial
-            for id in range(0, 1000):
+            for id in range(0, 100):
                 scu.send(f"./data/data{id}", id)
                 print(f"file sent: {id}", end="\r")
 
