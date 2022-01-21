@@ -11,7 +11,7 @@ SHUTDOWN_MSG = b"SHUTDOWN"
 MSG_NUMBER = 10
 
 host = enet.Host(None, 1, 0, 0, 0)
-peer = host.connect(enet.Address(b"localhost", 54301), 1)
+peer = host.connect(enet.Address(b"169.254.229.153", 8899), 1)
 
 counter = 0
 run = True
@@ -41,7 +41,7 @@ while run:
 
 
 # Part of the test to do with intercept callback and socket.send
-peer = host.connect(enet.Address(b"localhost", 54301), 1)
+peer = host.connect(enet.Address(b"169.254.229.153", 8899), 1)
 shutdown_scheduled = False
 run = True
 

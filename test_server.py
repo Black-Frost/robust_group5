@@ -2,7 +2,7 @@ import enet
 
 SHUTDOWN_MSG = "SHUTDOWN"
 
-host = enet.Host(enet.Address(b"localhost", 54301), 10, 0, 0, 0)
+host = enet.Host(enet.Address(b"169.254.229.153", 8899), 10, 0, 0, 0)
 
 connect_count = 0
 run = True
