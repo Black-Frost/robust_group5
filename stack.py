@@ -30,7 +30,7 @@ sizePerPart = 102400 // partsPerFile
 indexingSize = 2
 
 threads = 1
-filenumber = 270
+filenumber = 1000
 require = []
 current_file = 0
 DATA_PATH = "data/data"
