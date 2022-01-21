@@ -24,7 +24,7 @@ Hanako = ("169.254.229.153", 14548)
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 s2 = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-partsPerFile = 100
+partsPerFile = 40
 fileSize = 102400
 sizePerPart = 102400 // partsPerFile
 indexingSize = 2
