@@ -133,7 +133,7 @@ if side == 'sender':
     host, port = Hanako
     bind_host, bind_port = Taro
   elif user == "Hanako":
-    filenumber = 1000
+    filenumber = 10000
     host, port = Taro
     bind_host, bind_port = Hanako
   raws = [[] for _ in range(filenumber)]
@@ -146,7 +146,7 @@ if side == 'sender':
   signal.setitimer(signal.ITIMER_REAL, INTERRUPT_TIME, INTERRUPT_TIME)
 else:
   if user == "Taro":
-    filenumber = 1000
+    filenumber = 10000
     host, port = Taro
     bind_host, bind_port = Hanako
   elif user == "Hanako":
