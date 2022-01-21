@@ -11,7 +11,7 @@ addr = bytes(os.environ["HANAKO"],"utf-8")
 
 
 
-if side == "recv":
+if side == "send":
   host = enet.Host(enet.Address(addr,8899),10,8,0,0)
   connect_count = 0
   run = True
@@ -36,14 +36,14 @@ if side == "recv":
         if event.packet.data == b"SHUTDOWN":
             shutdown_recv = True
 
-elif side == "send":
+elif side == "recv":
   counter = 0
   SHUTDOWN_MSG = b"SHUTDOWN"
   MSG_NUMBER = 100
   host = enet.Host(None, 1, 0, 0, 0)
   peer = host.connect(enet.Address(addr, 8899), 1)
   run = True
-  datalist = [i for i in range(1000)]
+  datalist = [i for i in range(100)]
   ind = 0
   while run:
     print("=======================================current len dl", len(datalist))
