@@ -108,7 +108,7 @@ class SCU:
                                 lost_packets_send = lost
                                 #seqPos = 0
                             if (last_seq > max_last_seq):
-                                lost_packets_send = sorted(lost + lost_packets_send)
+                                lost_packets_send = list(set(lost + lost_packets_send))
                                 max_last_seq = last_seq
                                 #lost_packets_send = lost
 
