@@ -8,10 +8,10 @@ from mlt_stack import DATA_PATH
 
 load_dotenv()
 
-target = "" #the target address of the server
-this_ip = "" #the running machine's address
-target_port = 0 #the target port
-this_port = 0 #the running machine's port
+receiver_ip = "" #the target address of the server
+sender_ip = "" #the running machine's address
+receiver_port = 0 #the target port
+sender_port = 0 #the running machine's port
 
 Taro_IP = "169.254.155.219"
 Taro_PORT = 14447
@@ -22,6 +22,8 @@ Hanako_PORT = 14547
 initial_file = 0
 file_part_size = 40
 threads_size = 10
+sender_port = 14577
+receiver_port = 14578
 
 #============== Static Config ==============#
 DATA_PREFIX = "data"
@@ -60,21 +62,21 @@ def import_file(start=0, db_size=100):
   return raw_datalist      
 
 
-def send_data(db, port_offset):
+def send_data(db, port_offset=0):
   global current_file
   sub_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
   for packets in db:
     for packet in packets:
-      sub_socket.sendto(packet, (target, target_port + port_offset))
+      sub_socket.sendto(packet, (receiver_ip, receiver_port + port_offset))
     current_file += 1
 
 # def add_check_corrupted(sub_socket):
 #   recv_data = sub_socket.recv(2000)
 
 
-def recv_data(port_offset):
+def recv_data(port_offset=0):
   sub_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-  sub_socket.bind((host, port + port_offset))
+  sub_socket.bind((receiver_ip, receiver_port + port_offset))
   global corrupted_file
   global current_file
   count = 0
@@ -110,28 +112,43 @@ HANAKO = os.environ["HANAKO"]
 
 if side == "send":
   if user == "Taro":
-    target = Hanako_IP
-    this_ip = Taro_IP
+    receiver_ip = HANAKO
+    sender_ip = TARO
   elif user == "Hanako":
-    target = TARO
-    this_ip = HANAKO
+    receiver_ip = TARO
+    sender_ip = HANAKO
 else:
   if user == "Taro":
-    target = TARO
-    this_ip = HANAKO
+    receiver_ip = TARO
+    sender_ip = HANAKO
   elif user == "Hanako":
-    target = HANAKO
-    this_ip = TARO
+    receiver_ip = HANAKO
+    sender_ip = TARO
+
+if (side == "send" and user == "Hanako") or (side == "recv" and user == "Taro"):
+  receiver_ip = TARO
+  sender_ip = HANAKO
+else:
+  receiver_ip = HANAKO
+  sender_ip = TARO
+
+
+# if side == "send":
+#   threads_list = {}
+#   db_size = file_quantity / threads_size
+#   for thread_id in range(threads_size):
+#     start = thread_id * db_size
+#     db = import_file(start, db_size)
+#     thread = threading.Thread(target=send_data, args=(db, thread_id))
+#     thread.start()
+#     threads_list[thread_id] = thread
 
 if side == "send":
-  threads_list = {}
-  db_size = file_quantity / threads_size
-  for thread_id in range(threads_size):
-    start = thread_id * db_size
-    db = import_file(start, db_size)
-    thread = threading.Thread(target=send_data, args=(db, thread_id))
-    thread.start()
-    threads_list[thread_id] = thread
+  db = import_file(0, 1000)
+  send_data(db)
+
+else:
+  recv_data()
 
 
 
