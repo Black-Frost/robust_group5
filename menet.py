@@ -7,6 +7,7 @@ import enet
 
 load_dotenv()
 side = os.environ["side"]
+print(os.environ)
 addr = bytes(os.environ["HANAKO"],"utf-8")
 
 
