@@ -28,7 +28,8 @@ receiver_port = 14578
 #============== Static Config ==============#
 DATA_PREFIX = "data"
 DATA_PATH = "data/" + DATA_PREFIX
-filesize = os.path.getsize(DATA_PATH + "0") or 102400
+# filesize = os.path.getsize(DATA_PATH + "0") or 102400
+filesize = 102400
 part_size = filesize // file_part_size
 file_quantity = 1000
 header_size = 2
