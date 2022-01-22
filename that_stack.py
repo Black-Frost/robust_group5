@@ -13,7 +13,7 @@ sender_ip = "" #the running machine's address
 receiver_port = 0 #the target port
 sender_port = 0 #the running machine's port
 
-Taro_IP = "169.254.229.219"
+Taro_IP = "169.254.155.219"
 Taro_PORT = 24447
 Hanako_IP = "169.254.229.153"
 Hanako_PORT = 24547
@@ -260,6 +260,7 @@ lock = threading.Lock()
 #   req_resend_thread.join()
 
 fail_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+print((sender_ip, sender_port))
 fail_socket.bind((sender_ip, sender_port))
 if side == "send":
   db = import_file(0, 1000)
