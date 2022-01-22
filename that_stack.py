@@ -263,7 +263,7 @@ lock = threading.Lock()
 
 if side == "send":
   db = import_file(0, 1000)
-  sender_thread = threading.Thread(send_data, args=((db),0))
+  sender_thread = threading.Thread(target=send_data, args=((db),0))
   INTERRUPT_TIME = 0.3 #process resend every 0.1s
   sender_thread.start()
   signal.signal(signal.SIGALRM, check_fail)
