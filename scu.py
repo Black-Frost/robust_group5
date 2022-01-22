@@ -104,7 +104,7 @@ class SCU:
                             return
                         elif sq < len(all_packets): # Retransmission request
                             retransmit_seq = max(sq, retransmit_seq)
-                            if (retransmit_seq == sq):
+                            if (retransmit_seq == sq or len(lost) < len(lost_packets_send)):
                                 lost_packets_send = lost
                                 #seqPos = 0
                             if (last_seq > max_last_seq):
