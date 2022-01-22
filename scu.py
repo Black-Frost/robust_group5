@@ -12,7 +12,7 @@ class SCUMode(Enum):
     RecvMode = 1
 
 class SCU:
-    def __init__(self, mtu=1500):
+    def __init__(self, mtu=1024):
         self.mtu = mtu
 
     def bind_as_sender(self, receiver_address):
@@ -151,7 +151,7 @@ class SCU:
 
                 key = utils.endpoint2str(from_addr, packet.header.id)
                 if key not in self.received_files_data:
-                    self.received_files_data[key] = [b""]*100
+                    self.received_files_data[key] = [b""]*103
                     received_files_flag[key] = False
                     self.lost_packets_recv[key] = []
 

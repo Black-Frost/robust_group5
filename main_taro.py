@@ -8,7 +8,7 @@ TARO = "169.254.155.219"
 
 def main():
     if sys.argv[1] == "sender":
-        scu = SCU(mtu=1500)
+        scu = SCU(mtu=1024)
         scu.bind_as_sender(receiver_address=(HANAKO, 8889))
         try:
             # serial
@@ -31,7 +31,7 @@ def main():
 
     elif sys.argv[1] == "receiver":
         # TODO
-        scu = SCU(mtu = 1500)
+        scu = SCU(mtu = 1024)
         scu.bind_as_receiver(receiver_address = (TARO, 8889))
         for i in range(0, 1000):
             filedata = scu.recv()
