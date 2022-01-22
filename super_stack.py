@@ -97,7 +97,7 @@ def check_lost_packet():
 def listen_lost_packet():
   global sender_ip
   sub_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-  sub_socket.bind(sender_ip, sender_port)
+  sub_socket.bind((sender_ip, sender_port))
   while True:
     data = sub_socket.recv(header_size)
     packet_id = int.from_bytes(data, "big")
@@ -196,7 +196,7 @@ else:
 if side == "send":
   db = import_file(0, 1000)
   # send_data(db)
-  send_thread = threading.Thread(target=send_data, args=(db,0))
+  send_thread = threading.Thread(target=send_data, args=((db),0))
   resend_thread = threading.Thread(target=listen_lost_packet)
   send_thread.start()
   resend_thread.start()
