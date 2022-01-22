@@ -14,16 +14,16 @@ receiver_port = 0 #the target port
 sender_port = 0 #the running machine's port
 
 Taro_IP = "169.254.155.219"
-Taro_PORT = 24447
+# Taro_PORT = 24447
 Hanako_IP = "169.254.229.153"
-Hanako_PORT = 24547
+# Hanako_PORT = 24547
 
 #============== Custom Config ==============#
 initial_file = 0
 file_part_size = 40
 threads_size = 10
-sender_port = 14679
-receiver_port = 14675
+sender_port = 24679
+receiver_port = 24675
 
 #============== Static Config ==============#
 DATA_PREFIX = "data"
