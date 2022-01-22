@@ -126,6 +126,40 @@ def resend_failed_packets(db, port_offset=0):
       fail_packets.remove(packet_id)
       # lock.release()
 
+def check_fail(db):
+  sub_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+  send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+  sub_socket.bind((sender_ip, sender_port))
+  data = sub_socket.recv(1000*header_size)
+ # print("#### resend ####")
+  for j in range(0,len(data),header_size):
+    packet_id = int.from_bytes(data[j:j + header_size],'big')
+    file = packet_id // file_part_size
+    part = packet_id % file_part_size
+    send_socket.sendto(db[file][part], (receiver_ip, receiver_port))
+  #  print((file,part))
+ # print("############\n")
+
+
+def require_resend_thread():
+  INTERRUPT_TIME = 0.4 #check every 0.1s    
+  sub_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+  while True:
+    time.sleep(INTERRUPT_TIME)
+    lock.acquire()
+    r = corrupted_file.copy()
+    now = copy.deepcopy(current_file)
+    lock.release()
+    raw = b""
+    for i in range(now-1, -1 ,-1):
+      if not r[i][file_part_size]:
+        continue
+      for j in range(file_part_size):
+        if r[i][j] == True:
+          raw += (i*file_part_size + j).to_bytes(2,'big')
+    sub_socket.sendto(raw,(sender_ip, sender_port))
+
+
 def recv_data(port_offset=0):
   sub_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
   sub_socket.bind((receiver_ip, receiver_port + port_offset))
@@ -205,25 +239,37 @@ else:
 #     threads_list[thread_id] = thread
 
 lock = threading.Lock()
+# if side == "send":
+#   db = import_file(0, 1000)
+#   # send_data(db)
+#   send_thread = threading.Thread(target=send_data, args=((db),0))
+#   listen_lost_thread = threading.Thread(target=listen_lost_packet)
+#   resend_thread = threading.Thread(target=resend_failed_packets, args=((db),0))
+#   listen_lost_thread.start()
+#   send_thread.start()
+#   resend_thread.start()
+#   listen_lost_thread.join()
+#   send_thread.join()
+#   resend_thread.join()
+# else:
+#   # recv_data()
+#   receive_thread = threading.Thread(target=recv_data, args=())
+#   req_resend_thread = threading.Thread(target=check_lost_packet, args=())
+#   receive_thread.start()
+#   req_resend_thread.start()
+#   receive_thread.join()
+#   req_resend_thread.join()
+
 if side == "send":
-  db = import_file(0, 1000)
-  # send_data(db)
-  send_thread = threading.Thread(target=send_data, args=((db),0))
-  listen_lost_thread = threading.Thread(target=listen_lost_packet)
-  resend_thread = threading.Thread(target=resend_failed_packets, args=((db),0))
-  listen_lost_thread.start()
-  send_thread.start()
-  resend_thread.start()
-  listen_lost_thread.join()
-  send_thread.join()
-  resend_thread.join()
+  sender_thread = threading.Thread(send_data)
+  INTERRUPT_TIME = 0.3 #process resend every 0.1s
+  sender_thread.start()
+  signal.signal(signal.SIGALRM, check_fail)
+  signal.setitimer(signal.ITIMER_REAL, INTERRUPT_TIME, INTERRUPT_TIME)
 else:
-  # recv_data()
   receive_thread = threading.Thread(target=recv_data, args=())
-  req_resend_thread = threading.Thread(target=check_lost_packet, args=())
+  req_resend_thread = threading.Thread(target=require_resend_thread, args=())
   receive_thread.start()
   req_resend_thread.start()
   receive_thread.join()
   req_resend_thread.join()
-
-
