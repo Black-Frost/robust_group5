@@ -126,7 +126,7 @@ def resend_failed_packets(db, port_offset=0):
       fail_packets.remove(packet_id)
       # lock.release()
 
-def check_fail():
+def check_fail(_1,_2):
   global db
   sub_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
   send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
