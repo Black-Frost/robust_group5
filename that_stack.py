@@ -128,11 +128,10 @@ def resend_failed_packets(db, port_offset=0):
 
 def check_fail(_1,_2):
   global db
-  send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
   data = fail_socket.recv(1000*header_size)
  # print("#### resend ####")
-  for j in range(0,len(data),header_size):
-    packet_id = int.from_bytes(data[j:j + header_size],'big')
+  for i in range(0,len(data),header_size):
+    packet_id = int.from_bytes(data[i: (i + header_size)],'big')
     file = packet_id // file_part_size
     part = packet_id % file_part_size
     send_socket.sendto(db[file][part], (receiver_ip, receiver_port))
@@ -147,15 +146,16 @@ def require_resend_thread():
     time.sleep(INTERRUPT_TIME)
     lock.acquire()
     r = corrupted_file.copy()
-    now = copy.deepcopy(current_file)
+    snap_current = copy.deepcopy(current_file)
     lock.release()
     raw = b""
-    for i in range(now-1, -1 ,-1):
-      if not r[i][file_part_size]:
+    for file_id in range(snap_current-1, -1 ,-1):
+      if not r[file_id][file_part_size]:
         continue
-      for j in range(file_part_size):
-        if r[i][j] == True:
-          raw += (i*file_part_size + j).to_bytes(2,'big')
+      for file_part in range(file_part_size):
+        if r[file_id][file_part] == True:
+          raw += (file_id*file_part_size + file_part).to_bytes(2,'big')
+    print("send req resent", )
     sub_socket.sendto(raw,(sender_ip, sender_port))
 
 
@@ -175,7 +175,10 @@ def recv_data(port_offset=0):
     file_part = packet_id % file_part_size
     
     print("recv:", packet_id, file_id, file_part)
-
+    lock.acquire()
+    if not corrupted_file[file_id][file_part]:
+      lock.release()
+      continue
 
 
     # thread_locker.acquire()
@@ -183,6 +186,7 @@ def recv_data(port_offset=0):
     #   continue
     # packets_list.remove(packet_id)
     corrupted_file[file_id][file_part] = False
+    current_file = file_id
 
     received_files_db.setdefault(file_id, [])
     received_files_db[file_id].append([file_part, data])
@@ -194,8 +198,11 @@ def recv_data(port_offset=0):
       raw_data = b''.join(raw_data_list)
       open(write_path, "wb").write(raw_data)
       count += 1
-      current_file = file_id
+      
       print("Writing file_id:", file_id)
+      lock.acquire()
+      corrupted_file[file_id][file_part_size] = False
+      lock.release()
       del received_files_db[file_id]
       # print("writing :",file_id)
 
@@ -265,6 +272,7 @@ if side == "send":
   fail_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
   # print((sender_ip, sender_port))
   fail_socket.bind((sender_ip, sender_port))
+  send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
   sender_thread = threading.Thread(target=send_data, args=((db),0))
   INTERRUPT_TIME = 0.3 #process resend every 0.1s
   sender_thread.start()
