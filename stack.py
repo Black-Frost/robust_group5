@@ -128,7 +128,7 @@ def get_data():
       del buff[file]
 
 
-if side == 'sender':
+if side == 'send':
   if user == "Taro":
     host, port = Hanako
     bind_host, bind_port = Taro
