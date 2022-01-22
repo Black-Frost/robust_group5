@@ -128,10 +128,8 @@ def resend_failed_packets(db, port_offset=0):
 
 def check_fail(_1,_2):
   global db
-  sub_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
   send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-  sub_socket.bind((sender_ip, sender_port))
-  data = sub_socket.recv(1000*header_size)
+  data = fail_socket.recv(1000*header_size)
  # print("#### resend ####")
   for j in range(0,len(data),header_size):
     packet_id = int.from_bytes(data[j:j + header_size],'big')
@@ -261,6 +259,8 @@ lock = threading.Lock()
 #   receive_thread.join()
 #   req_resend_thread.join()
 
+fail_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+fail_socket.bind((sender_ip, sender_port))
 if side == "send":
   db = import_file(0, 1000)
   sender_thread = threading.Thread(target=send_data, args=((db),0))
