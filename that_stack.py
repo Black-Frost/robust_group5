@@ -126,7 +126,8 @@ def resend_failed_packets(db, port_offset=0):
       fail_packets.remove(packet_id)
       # lock.release()
 
-def check_fail(db):
+def check_fail():
+  global db
   sub_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
   send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
   sub_socket.bind((sender_ip, sender_port))
@@ -261,7 +262,8 @@ lock = threading.Lock()
 #   req_resend_thread.join()
 
 if side == "send":
-  sender_thread = threading.Thread(send_data)
+  db = import_file(0, 1000)
+  sender_thread = threading.Thread(send_data, args=((db),0))
   INTERRUPT_TIME = 0.3 #process resend every 0.1s
   sender_thread.start()
   signal.signal(signal.SIGALRM, check_fail)
