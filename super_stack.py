@@ -116,7 +116,7 @@ def resend_failed_packets(db, port_offset=0):
   sub_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
   while True:
     if len(fail_packets) > 0:
-      lock.acquire()
+      # lock.acquire()
       packet_id = fail_packets[0]
       file = header_size // file_part_size
       part = header_size % file_part_size
@@ -124,7 +124,7 @@ def resend_failed_packets(db, port_offset=0):
       print("resend_failed_packets", packet_id)
       sub_socket.sendto(packet, (receiver_ip, receiver_port + port_offset))
       fail_packets.remove(packet_id)
-      lock.release()
+      # lock.release()
 
 def recv_data(port_offset=0):
   sub_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
