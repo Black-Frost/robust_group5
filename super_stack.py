@@ -94,6 +94,7 @@ def check_lost_packet():
     for packet in packets_list:
       if packet <= current_packet:
         request_lost_packet(sub_socket, packet)
+  print("stop checking")
         
 def listen_lost_packet():
   global sender_ip
@@ -102,6 +103,7 @@ def listen_lost_packet():
   while True:
     data = sub_socket.recv(header_size)
     packet_id = int.from_bytes(data, "big")
+    print("fail_packets", fail_packets)
     if packet_id not in fail_packets:
       print('recv fail_packets req', packet_id)
       fail_packets.append(packet_id)
