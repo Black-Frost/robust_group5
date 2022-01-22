@@ -14,9 +14,9 @@ receiver_port = 0 #the target port
 sender_port = 0 #the running machine's port
 
 Taro_IP = "169.254.229.219"
-Taro_PORT = 14447
+Taro_PORT = 24447
 Hanako_IP = "169.254.229.153"
-Hanako_PORT = 14547
+Hanako_PORT = 24547
 
 #============== Custom Config ==============#
 initial_file = 0
