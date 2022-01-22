@@ -84,7 +84,8 @@ def send_data(db, port_offset=0):
 #   recv_data = sub_socket.recv(2000)
 
 def request_lost_packet(sub_socket, packet_id, port_offset=0):
-  sub_socket.sendto(packet_id, (sender_ip, sender_port + port_offset))
+  raw_packet_id = (packet_id).to_bytes(packet_id, "big")
+  sub_socket.sendto(raw_packet_id, (sender_ip, sender_port + port_offset))
 
 def check_lost_packet():
   sub_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
