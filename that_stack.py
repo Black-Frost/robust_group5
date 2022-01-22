@@ -160,15 +160,13 @@ def require_resend_thread():
 
 
 def recv_data(port_offset=0):
-  sub_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-  sub_socket.bind((receiver_ip, receiver_port + port_offset))
   global corrupted_file
   global current_file
   count = 0
 
   while True:
     
-    data = sub_socket.recv(part_size + header_size)
+    data = recv_socket.recv(part_size + header_size)
     raw_header = data[:header_size]
     packet_id = int.from_bytes(raw_header, "big")
     file_id = packet_id // file_part_size
@@ -279,6 +277,8 @@ if side == "send":
   signal.signal(signal.SIGALRM, check_fail)
   signal.setitimer(signal.ITIMER_REAL, INTERRUPT_TIME, INTERRUPT_TIME)
 else:
+  recv_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+  recv_socket.bind((receiver_ip, receiver_port))
   receive_thread = threading.Thread(target=recv_data, args=())
   req_resend_thread = threading.Thread(target=require_resend_thread, args=())
   receive_thread.start()
