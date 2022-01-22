@@ -33,7 +33,7 @@ for i, received in enumerate(received_list):
             print(f"DUPLICATED: {filepath_list[i]}")
             DUP_count += 1
     else:
-        print(f"FAILED: {filepath_list[i]}")
+        print(f"FAILED: {filepath_list[i]}  Hashed: {received}")
         FAILED_count += 1
 
 print(f"OK = {OK_count}, FAILED = {FAILED_count}, DUP = {DUP_count}")
