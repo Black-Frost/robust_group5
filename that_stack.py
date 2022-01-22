@@ -22,8 +22,8 @@ Hanako_IP = "169.254.229.153"
 initial_file = 0
 file_part_size = 40
 threads_size = 10
-sender_port = 24695
-receiver_port = 24575
+sender_port = 38684
+receiver_port = 38685
 
 #============== Static Config ==============#
 DATA_PREFIX = "data"
