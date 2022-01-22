@@ -87,12 +87,15 @@ def recv_data(port_offset=0):
   count = 0
 
   while True:
-    print("recving data")
+    
     data = sub_socket.recv(part_size + header_size)
     raw_header = data[:header_size]
     packet_id = int.from_bytes(raw_header, "big")
     file_id = packet_id // file_part_size
     file_part = packet_id % file_part_size
+    
+    print("recv:", packet_id, file_id, file_part)
+
 
 
     # thread_locker.acquire()
