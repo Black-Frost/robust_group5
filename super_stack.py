@@ -85,6 +85,7 @@ def send_data(db, port_offset=0):
 
 def request_lost_packet(sub_socket, packet_id, port_offset=0):
   raw_packet_id = (packet_id).to_bytes(packet_id, "big")
+  print("request resend packet id:", packet_id)
   sub_socket.sendto(raw_packet_id, (sender_ip, sender_port + port_offset))
 
 def check_lost_packet():
@@ -101,6 +102,7 @@ def listen_lost_packet():
   while True:
     data = sub_socket.recv(header_size)
     packet_id = int.from_bytes(data, "big")
+    print('recv fail_packets req', packet_id)
     fail_packets.append(packet_id)
 
 
@@ -114,6 +116,7 @@ def resend_failed_packets(db, port_offset=0):
       file = header_size // file_part_size
       part = header_size % file_part_size
       packet = db[file][part]
+      print("resend_failed_packets", packet_id)
       sub_socket.sendto(packet, (receiver_ip, receiver_port + port_offset))
       fail_packets.remove(packet_id)
 
