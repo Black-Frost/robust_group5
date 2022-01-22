@@ -185,7 +185,7 @@ def recv_data(port_offset=0):
     # packets_list.remove(packet_id)
     corrupted_file[file_id][file_part] = False
     current_file = file_id
-
+    lock.release()
     received_files_db.setdefault(file_id, [])
     received_files_db[file_id].append([file_part, data])
     if len(received_files_db[file_id]) == file_part_size:
