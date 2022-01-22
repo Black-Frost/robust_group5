@@ -146,6 +146,8 @@ def recv_data(port_offset=0):
 
 
     # thread_locker.acquire()
+    if packet_id not in packets_list:
+      continue
     packets_list.remove(packet_id)
     # corrupted_file[file_id][file_part] = False
 
