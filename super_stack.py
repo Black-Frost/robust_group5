@@ -13,9 +13,9 @@ sender_ip = "" #the running machine's address
 receiver_port = 0 #the target port
 sender_port = 0 #the running machine's port
 
-Taro_IP = "169.254.155.219"
+Taro_IP = "169.254.229.219"
 Taro_PORT = 14447
-Hanako_IP = "169.254.155.153"
+Hanako_IP = "169.254.229.153"
 Hanako_PORT = 14547
 
 #============== Custom Config ==============#
@@ -131,12 +131,12 @@ else:
     receiver_ip = HANAKO
     sender_ip = TARO
 
-if (side == "send" and user == "Hanako") or (side == "recv" and user == "Taro"):
-  receiver_ip = TARO
-  sender_ip = HANAKO
-else:
-  receiver_ip = HANAKO
-  sender_ip = TARO
+# if (side == "send" and user == "Hanako") or (side == "recv" and user == "Taro"):
+#   receiver_ip = TARO
+#   sender_ip = HANAKO
+# else:
+#   receiver_ip = HANAKO
+#   sender_ip = TARO
 
 
 # if side == "send":
