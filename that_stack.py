@@ -259,11 +259,12 @@ lock = threading.Lock()
 #   receive_thread.join()
 #   req_resend_thread.join()
 
-fail_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-print((sender_ip, sender_port))
-fail_socket.bind((sender_ip, sender_port))
+
 if side == "send":
   db = import_file(0, 1000)
+  fail_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+  # print((sender_ip, sender_port))
+  fail_socket.bind((sender_ip, sender_port))
   sender_thread = threading.Thread(target=send_data, args=((db),0))
   INTERRUPT_TIME = 0.3 #process resend every 0.1s
   sender_thread.start()
