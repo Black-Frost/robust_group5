@@ -196,7 +196,7 @@ else:
 if side == "send":
   db = import_file(0, 1000)
   # send_data(db)
-  send_thread = threading.Thread(target=send_data, args=(db))
+  send_thread = threading.Thread(target=send_data, args=(db,0))
   resend_thread = threading.Thread(target=listen_lost_packet)
   send_thread.start()
   resend_thread.start()
