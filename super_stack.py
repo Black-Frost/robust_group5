@@ -209,8 +209,10 @@ if side == "send":
   send_thread = threading.Thread(target=send_data, args=((db),0))
   listen_lost_thread = threading.Thread(target=listen_lost_packet)
   resend_thread = threading.Thread(target=resend_failed_packets, args=((db),0))
+  listen_lost_thread.start()
   send_thread.start()
   resend_thread.start()
+  listen_lost_thread.join()
   send_thread.join()
   resend_thread.join()
 else:
