@@ -33,9 +33,12 @@ filesize = 102400
 part_size = filesize // file_part_size
 file_quantity = 1000
 header_size = 2
+packets_list = [i for i in (file_part_size * file_quantity)]
 
 #=============== Debug&Value ===============#
 current_file = initial_file
+fail_packets = []
+current_packet = 0
 corrupted_file = []
 received_files_db = {}
 # raw_db = []  # List to store all raw packet (partitioned)
@@ -52,7 +55,7 @@ def import_file(start=0, db_size=100):
 
     for packet_id in range(file_part_size):
       packet_id = (i * file_part_size) + packet_id
-      raw_header = (packet_id).to_bytes(2, "big")
+      raw_header = (packet_id).to_bytes(header_size, "big")
 
       raw_body = file[current_byte:last_byte]
 
@@ -75,9 +78,43 @@ def send_data(db, port_offset=0):
     if current_file % 5 ==0:
       print("send:",current_file)
 
+
+
 # def add_check_corrupted(sub_socket):
 #   recv_data = sub_socket.recv(2000)
 
+def request_lost_packet(sub_socket, packet_id, port_offset=0):
+  sub_socket.sendto(packet_id, (sender_ip, sender_port + port_offset))
+
+def check_lost_packet():
+  sub_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+  while True:
+    for packet in packets_list:
+      if packet <= current_packet:
+        request_lost_packet(sub_socket, packet)
+        
+def listen_lost_packet():
+  global sender_ip
+  sub_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+  sub_socket.bind(sender_ip, sender_port)
+  while True:
+    data = sub_socket.recv(header_size)
+    packet_id = int.from_bytes(data, "big")
+    fail_packets.append(packet_id)
+
+
+
+def resend_failed_packets(db, port_offset=0):
+  
+  sub_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+  while True:
+    if len(fail_packets) > 0:
+      packet_id = fail_packets[0]
+      file = header_size // file_part_size
+      part = header_size % file_part_size
+      packet = db[file][part]
+      sub_socket.sendto(packet, (receiver_ip, receiver_port + port_offset))
+      fail_packets.remove(packet_id)
 
 def recv_data(port_offset=0):
   sub_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -99,7 +136,7 @@ def recv_data(port_offset=0):
 
 
     # thread_locker.acquire()
-
+    packets_list.remove(packet_id)
     # corrupted_file[file_id][file_part] = False
 
     received_files_db.setdefault(file_id, [])
@@ -112,6 +149,7 @@ def recv_data(port_offset=0):
       raw_data = b''.join(raw_data_list)
       open(write_path, "wb").write(raw_data)
       count += 1
+      current_file = file_id
       print("Writing file_id:", file_id)
       del received_files_db[file_id]
       # print("writing :",file_id)
@@ -156,10 +194,20 @@ else:
 
 if side == "send":
   db = import_file(0, 1000)
-  send_data(db)
-
+  # send_data(db)
+  send_thread = threading.Thread(target=send_data, args=(db))
+  resend_thread = threading.Thread(target=listen_lost_packet)
+  send_thread.start()
+  resend_thread.start()
+  send_thread.join()
+  resend_thread.join()
 else:
-  recv_data()
-
+  # recv_data()
+  receive_thread = threading.Thread(target=recv_data, args=())
+  req_resend_thread = threading.Thread(target=check_lost_packet, args=())
+  receive_thread.start()
+  req_resend_thread.start()
+  receive_thread.join()
+  req_resend_thread.join()
 
 
