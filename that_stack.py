@@ -22,8 +22,8 @@ Hanako_PORT = 14547
 initial_file = 0
 file_part_size = 40
 threads_size = 10
-sender_port = 14579
-receiver_port = 14575
+sender_port = 14679
+receiver_port = 14675
 
 #============== Static Config ==============#
 DATA_PREFIX = "data"
