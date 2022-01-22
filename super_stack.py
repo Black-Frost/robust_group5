@@ -33,7 +33,7 @@ filesize = 102400
 part_size = filesize // file_part_size
 file_quantity = 1000
 header_size = 2
-packets_list = [i for i in (file_part_size * file_quantity)]
+packets_list = [i for i in range(file_part_size * file_quantity)]
 
 #=============== Debug&Value ===============#
 current_file = initial_file
