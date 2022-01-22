@@ -103,6 +103,7 @@ def listen_lost_packet():
   while True:
     data = sub_socket.recv(header_size)
     packet_id = int.from_bytes(data, "big")
+    print("recv fail,", packet_id)
     print("fail_packets", fail_packets)
     if packet_id not in fail_packets:
       print('recv fail_packets req', packet_id)
